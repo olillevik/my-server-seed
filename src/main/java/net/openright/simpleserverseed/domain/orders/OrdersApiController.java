@@ -62,8 +62,8 @@ public class OrdersApiController {
 			if (orderline.containsKey("product")) {
 				id = Long.parseLong(orderline.getString("product"));
 			}
-			String amount = orderline.getString("amount");
-			order.addOrderLine(id, Integer.valueOf(amount));
+			int amount = Integer.parseInt(orderline.getString("amount"));
+			order.addOrderLine(id, amount);
 		}
 		return order;
 	}
