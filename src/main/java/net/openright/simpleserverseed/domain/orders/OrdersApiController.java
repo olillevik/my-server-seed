@@ -1,76 +1,96 @@
 package net.openright.simpleserverseed.domain.orders;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import net.openright.infrastructure.db.Database;
-import net.openright.infrastructure.rest.JsonController;
+import net.openright.infrastructure.util.IOUtil;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+@Path("/orders")
+@Produces(MediaType.APPLICATION_JSON)
+public class OrdersApiController {
 
-public class OrdersApiController implements JsonController {
+	private OrdersRepository repository;
 
-    private OrdersRepository repository;
+	public OrdersApiController() {
+		this.repository = new OrdersRepository(new Database("jdbc/seedappDs"));
+	}
 
-    public OrdersApiController(Database database) {
-        this.repository = new OrdersRepository(database);
-    }
+	@GET
+	@Path("{id}")
+	public Response get(@PathParam("id") Integer id) {
+		return Response.ok().entity(toJson(repository.retrieve(id))).build();
+	}
 
-    @Override
-    public JSONObject getJSON(String id) {
-        return toJSON(repository.retrieve(Integer.parseInt(id)));
-    }
+	@GET
+	public Response list() {
+		return Response.ok(toJsonList(repository.list())).build();
+	}
 
-    @Override
-    public JSONObject listJSON(HttpServletRequest req) {
-        return new JSONObject()
-            .put("orders", mapToJSON(repository.list(), this::toJSON));
-    }
+	@POST
+	public void post(String json) {
+		repository.insert(toOrder(IOUtil.toJson(json)));
+	}
 
-    @Override
-    public void postJSON(JSONObject jsonObject) {
-        repository.insert(toOrder(jsonObject));
-    }
+	@POST
+	@Path("{id}")
+	public void put(@PathParam("id") String id, String json) {
+		repository.update(Integer.parseInt(id), toOrder(IOUtil.toJson(json)));
+	}
 
-    @Override
-    public void putJSON(String id, JSONObject jsonObject) {
-        repository.update(Integer.parseInt(id), toOrder(jsonObject));
-    }
+	private Order toOrder(JsonObject json) {
+		Order order = new Order(json.getString("title"));
+		JsonArray array = json.getJsonArray("orderlines");
+		for (int i = 0; i < array.size(); i++) {
+			JsonObject orderline = array.getJsonObject(i);
+			if (orderline.getString("amount").isEmpty()) {
+				continue;
+			}
+			long id = 0;
+			if (orderline.containsKey("product")) {
+				id = Long.parseLong(orderline.getString("product"));
+			}
+			String amount = orderline.getString("amount");
+			order.addOrderLine(id, Integer.valueOf(amount));
+		}
+		return order;
+	}
 
-    private Order toOrder(JSONObject jsonObject) {
-        Order order = new Order(jsonObject.getString("title"));
+	private JsonObject toJson(Order order) {
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		JsonObjectBuilder obj = Json.createObjectBuilder().add("id", order.getId()).add("title", order.getTitle());
+		for (OrderLine orderLine : order.getOrderLines()) {
+			array.add(toJson(orderLine));
+		}
+		obj.add("orderlines", array);
+		JsonObject json = obj.build();
+		return json;
+	}
 
-        JSONArray jsonArray = jsonObject.getJSONArray("orderlines");
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject orderLine = jsonArray.getJSONObject(i);
-            if (orderLine.getString("amount").isEmpty()) {
-                continue;
-            }
-            order.addOrderLine(orderLine.optLong("product"), orderLine.optInt("amount"));
-        }
+	private JsonObject toJson(OrderLine orderLine) {
+		JsonObjectBuilder obj = Json.createObjectBuilder().add("productId", orderLine.getProductId())
+				.add("amount", orderLine.getAmount());
+		return obj.build();
+	}
 
-        return order;
-    }
-
-    private JSONObject toJSON(Order order) {
-        return new JSONObject()
-            .put("id", order.getId())
-            .put("title", order.getTitle())
-            .put("orderlines", mapToJSON(order.getOrderLines(), this::toJSON));
-    }
-
-    private JSONObject toJSON(OrderLine line) {
-        return new JSONObject()
-            .put("productId", line.getProductId())
-            .put("amount", line.getAmount());
-    }
-
-    private <T> JSONArray mapToJSON(List<T> list, Function<T, JSONObject> mapper) {
-        return new JSONArray(list.stream().map(mapper).collect(Collectors.toList()));
-    }
-
+	private JsonObject toJsonList(List<Order> list) {
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for (Order order : list) {
+			array.add(toJson(order));
+		}
+		JsonObjectBuilder obj = Json.createObjectBuilder().add("orders", array);
+		return obj.build();
+	}
 }

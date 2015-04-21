@@ -7,9 +7,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class IOUtil {
+	
+	private static final Logger log = LoggerFactory.getLogger(IOUtil.class);
 
 	public static void extractResourceFile(String filename) {
 		File file = new File(filename);
@@ -53,6 +63,13 @@ public class IOUtil {
 			return out.toString();
 		} catch (IOException e) {
 			throw ExceptionUtil.soften(e);
+		}
+	}
+	
+	public static JsonObject toJson(String string) {
+		log.debug("Converting string to json: " + string);
+		try(JsonReader reader = Json.createReader(new StringReader(string))) {
+			return reader.readObject();
 		}
 	}
 

@@ -2,7 +2,8 @@ package net.openright.simpleserverseed.domain.products;
 
 import net.openright.infrastructure.db.Database;
 import net.openright.infrastructure.db.Database.Row;
-import net.openright.infrastructure.rest.RequestException;
+
+import javax.ws.rs.NotFoundException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -22,7 +23,7 @@ public class ProductRepository {
 
 	public Product retrieve(long id) {
 		return db.queryForSingle("select * from products where id = ?", ProductRepository::toProduct, id)
-				.orElseThrow(() -> new RequestException(404, "Order " + id + " not found"));
+				.orElseThrow(() -> new NotFoundException("Order " + id + " not found"));
 	}
 
 	public List<Product> list() {
@@ -30,7 +31,7 @@ public class ProductRepository {
 				ProductRepository::toProduct, true);
 	}
 
-	public void update(Long id, Product product) {
+	void update(Long id, Product product) {
 		db.executeOperation("update products set price = ?, active = ?, description = ?, title = ? where id = ?",
 				product.getPrice(), product.isActive(), product.getDescription(), product.getTitle(), id);
 	}

@@ -1,12 +1,14 @@
 package net.openright.simpleserverseed.domain.orders;
 
-import net.openright.infrastructure.db.Database;
-import net.openright.infrastructure.db.Database.Row;
-import net.openright.infrastructure.rest.RequestException;
-import net.openright.simpleserverseed.domain.products.ProductRepository;
-
 import java.sql.SQLException;
 import java.util.List;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+
+import net.openright.infrastructure.db.Database;
+import net.openright.infrastructure.db.Database.Row;
+import net.openright.simpleserverseed.domain.products.ProductRepository;
 
 class OrdersRepository {
 
@@ -23,7 +25,8 @@ class OrdersRepository {
 	Order retrieve(int id) {
 		return database
 				.queryForSingle("select * from orders where id = ?", (row) -> toOrderWithOrderLines(id, row), id)
-				.orElseThrow(() -> new RequestException(404, "Can't find object with id " + id));
+				.orElseThrow(() -> new NotFoundException("Can't find object with id " + id));
+		
 	}
 
 	void insert(Order order) {
@@ -93,7 +96,7 @@ class OrdersRepository {
 			throw new RuntimeException("Null title is invalid");
 		}
 		if (order.getTitle().contains("foul")) {
-			throw new RequestException("No foul language in orders, please!");
+			throw new BadRequestException("No foul language in orders, please!");
 		}
 	}
 }

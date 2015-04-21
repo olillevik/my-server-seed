@@ -21,6 +21,7 @@ public class ServerUtil {
         requestLog.setAppend(true);
         requestLog.setLogTimeZone("UTC+01:00");
         requestLog.setExtended(false);
+        requestLog.setLogLatency(true);
 		return requestLog;
 	}
 

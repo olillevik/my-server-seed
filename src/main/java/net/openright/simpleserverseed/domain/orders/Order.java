@@ -14,11 +14,20 @@ class Order {
         this.title = title;
     }
 
-    public void addOrderLine(Long productId, int amount) {
+
+    int getId() {
+        return id;
+    }
+
+    String getTitle() {
+        return title;
+    }
+    
+    void addOrderLine(Long productId, int amount) {
         this.orderLines.add(new OrderLine(productId, amount));
     }
 
-    public double getTotalAmount() {
+    double getTotalAmount() {
         return orderLines.stream().map(line -> line.getPrice()).reduce(0.0, (a,b) -> a+b);
     }
 
@@ -30,15 +39,7 @@ class Order {
         this.id = id;
     }
 
-    int getId() {
-        return id;
-    }
-
-    String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
+    void setTitle(String title) {
         this.title = title;
     }
 
