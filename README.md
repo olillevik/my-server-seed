@@ -1,5 +1,8 @@
-Sopra Steria reference Java architecture
+My reference Java architecture
 ================================
+
+Based on the SopraSteria referance architecture
+--------------------------------
 
 * Any change developers make during development should be reflected in the running application within few seconds
 * The application starting point should minimize the number of technologies and especially limit the use of sophisticated technologies
