@@ -69,8 +69,8 @@ public class OrdersApiController {
 	}
 
 	private JsonObject toJson(Order order) {
-		JsonArrayBuilder array = Json.createArrayBuilder();
 		JsonObjectBuilder obj = Json.createObjectBuilder().add("id", order.getId()).add("title", order.getTitle());
+		JsonArrayBuilder array = Json.createArrayBuilder();
 		for (OrderLine orderLine : order.getOrderLines()) {
 			array.add(toJson(orderLine));
 		}
