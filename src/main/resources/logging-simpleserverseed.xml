@@ -30,12 +30,12 @@
 		</encoder>
 	</appender>
 
-	<logger name="net.openright.simpleserverseed" level="debug" />
+	<logger name="net.openright.simpleserverseed" level="DEBUG" />
+	
+	<logger name="org.eclipse.jetty" level="WARN" />
+	<logger name="com.zaxxer.hikari" level="WARN" />
 
-	<logger name="org.eclipse.jetty" level="warn" />
-	<logger name="com.zaxxer.hikari" level="warn" />
-
-	<root level="debug">
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="ALERT" />
 		<appender-ref ref="FILE" />

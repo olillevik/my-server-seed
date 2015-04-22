@@ -11,7 +11,7 @@ import net.openright.infrastructure.test.WebTestUtil;
 import net.openright.simpleserverseed.application.SeedAppServer;
 import net.openright.simpleserverseed.application.SimpleseedTestConfig;
 import net.openright.simpleserverseed.domain.products.Product;
-import net.openright.simpleserverseed.domain.products.ProductRepository;
+import net.openright.simpleserverseed.domain.products.ProductRepositoryForTestData;
 import net.openright.simpleserverseed.domain.products.ProductRepositoryTest;
 
 import org.junit.AfterClass;
@@ -31,7 +31,7 @@ public class OrderWebTest {
     private static WebDriverWait wait;
     private Database database = new Database("jdbc/seedappDs");
     private OrdersRepository orderRepository = new OrdersRepository(database);
-    private ProductRepository productRepository = new ProductRepository(database);
+    private ProductRepositoryForTestData productRepository = new ProductRepositoryForTestData(database);
 
     @BeforeClass
     public static void startServer() throws Exception {

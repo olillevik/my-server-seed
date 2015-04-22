@@ -6,7 +6,7 @@ import net.openright.infrastructure.test.SampleData;
 import net.openright.simpleserverseed.application.SeedAppConfig;
 import net.openright.simpleserverseed.application.SimpleseedTestConfig;
 import net.openright.simpleserverseed.domain.products.Product;
-import net.openright.simpleserverseed.domain.products.ProductRepository;
+import net.openright.simpleserverseed.domain.products.ProductRepositoryForTestData;
 import net.openright.simpleserverseed.domain.products.ProductRepositoryTest;
 
 import org.junit.Before;
@@ -17,12 +17,12 @@ public class OrderRepositoryTest {
     private SeedAppConfig config = new SimpleseedTestConfig();
     private Database database = new Database(config.createDataSource());
     private OrdersRepository repository = new OrdersRepository(database);
-    private ProductRepository productRepository = new ProductRepository(database);
+    private ProductRepositoryForTestData productTestRepository = new ProductRepositoryForTestData(database);
     private Product product = ProductRepositoryTest.sampleProduct();
 
     @Before
     public void saveProduct() {
-        productRepository.insert(product);
+    	productTestRepository.insert(product);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class OrderRepositoryTest {
     @Test
     public void shouldRetrieveSavedOrdersWithOrderLines() throws Exception {
         Product product2 = ProductRepositoryTest.sampleProduct();
-        productRepository.insert(product2);
+        productTestRepository.insert(product2);
 
         Order order = sampleOrder();
 
