@@ -1,17 +1,20 @@
 package net.openright.infrastructure.db;
 
 import net.openright.infrastructure.util.ExceptionUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class Database {
 
@@ -160,19 +163,24 @@ public class Database {
 	 * {@link #queryForSingle(String, RowMapper, Object...) queryForSingle} or
 	 * {@link #executeOperation(String, Object...) executeOperation}
 	 *
-	 * @param operation is a functional interface to allow transaction to run in a thread.
+	 * @param operation operation is a functional interface to allow transaction to run in a thread.
+	 * @return allows returning values. Intended for returning id from created resources.
 	 */
-	public void doInTransaction(Runnable operation) {
+	public <V> V doInTransaction(Callable<V> operation) {
+		V v = null;
 		try (Connection connection = dataSource.getConnection()) {
 			threadConnection.set(connection);
 			try {
-				operation.run();
+				v = operation.call();
+			} catch (Exception e) {
+				e.printStackTrace();
 			} finally {
 				threadConnection.set(null);
 			}
 		} catch (SQLException e) {
 			throw ExceptionUtil.soften(e);
 		}
+		return v;
 	}
 	
 	private interface ConnectionCallback<T> {

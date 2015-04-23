@@ -1,5 +1,7 @@
 package net.openright.simpleserverseed.domain.orders;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.json.Json;
@@ -12,8 +14,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.openright.infrastructure.db.Database;
 import net.openright.infrastructure.util.IOUtil;
@@ -21,6 +28,11 @@ import net.openright.infrastructure.util.IOUtil;
 @Path("/orders")
 @Produces(MediaType.APPLICATION_JSON)
 public class OrdersApiController {
+	
+	private static final Logger log = LoggerFactory.getLogger(OrdersApiController.class);
+	
+	@Context
+	UriInfo uri;
 
 	private OrdersRepository repository;
 
@@ -40,8 +52,17 @@ public class OrdersApiController {
 	}
 
 	@POST
-	public void post(String json) {
-		repository.insert(toOrder(IOUtil.toJson(json)));
+	public Response post(String json) {
+		try {
+			int id = repository.insert(toOrder(IOUtil.toJson(json)));
+			String uriString = uri.getAbsolutePath().toString();
+			URI resourceUri = new URI(uriString + "/" + id);
+			log.debug("returning resourceURI {}",resourceUri.toString() );
+			return Response.created(resourceUri).build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return Response.serverError().build();
+		}
 	}
 
 	@POST

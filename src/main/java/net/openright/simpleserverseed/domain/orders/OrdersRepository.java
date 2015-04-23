@@ -29,13 +29,13 @@ class OrdersRepository {
 		
 	}
 
-	void insert(Order order) {
+	int insert(Order order) {
 		validateOrder(order);
-
-		database.doInTransaction(() -> {
+		return database.doInTransaction(() -> {
 			int orderId = database.insert("insert into orders (title) values (?) returning id", order.getTitle());
 			order.setId(orderId);
 			insertOrderLines(order.getId(), order);
+			return orderId;
 		});
 	}
 
@@ -46,6 +46,7 @@ class OrdersRepository {
 			updateOrder(orderId, order);
 			deleteOrderLines(orderId);
 			insertOrderLines(orderId, order);
+			return null;
 		});
 	}
 
