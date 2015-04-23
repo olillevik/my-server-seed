@@ -32,7 +32,7 @@ public class OrdersApiController {
 	private static final Logger log = LoggerFactory.getLogger(OrdersApiController.class);
 	
 	@Context
-	UriInfo uri;
+	private UriInfo uri;
 
 	private OrdersRepository repository;
 
