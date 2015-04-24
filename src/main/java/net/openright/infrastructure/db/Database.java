@@ -162,25 +162,42 @@ public class Database {
 	 * {@link #queryForList(String, RowMapper, Object...) queryForList},
 	 * {@link #queryForSingle(String, RowMapper, Object...) queryForSingle} or
 	 * {@link #executeOperation(String, Object...) executeOperation}
+	 * @param <V>
 	 *
-	 * @param operation operation is a functional interface to allow transaction to run in a thread.
-	 * @return allows returning values. Intended for returning id from created resources.
+	 * @param operation is a functional interface to allow transaction to run in a thread.
 	 */
-	public <V> V doInTransaction(Callable<V> operation) {
-		V v = null;
+	public void doInTransaction(Runnable operation) {
 		try (Connection connection = dataSource.getConnection()) {
 			threadConnection.set(connection);
 			try {
-				v = operation.call();
-			} catch (Exception e) {
-				e.printStackTrace();
+				operation.run();
 			} finally {
 				threadConnection.set(null);
 			}
 		} catch (SQLException e) {
 			throw ExceptionUtil.soften(e);
 		}
-		return v;
+	}
+	
+	/**
+	 * Equivalent to {@link #doInTransaction(Runnable)} with return statement.
+	 * 
+	 * @param operation is a functional interface to allow transaction to run in a thread.
+	 * @return allows returning values. Intended for returning id from created resources.
+	 */
+	public <V> V doInTransactionWithResult(Callable<V> operation) {
+		try (Connection connection = dataSource.getConnection()) {
+			threadConnection.set(connection);
+			try {
+				return operation.call();
+			} catch (Exception e) {
+				throw ExceptionUtil.soften(e);
+			} finally {
+				threadConnection.set(null);
+			}
+		} catch (SQLException e) {
+			throw ExceptionUtil.soften(e);
+		}
 	}
 	
 	private interface ConnectionCallback<T> {

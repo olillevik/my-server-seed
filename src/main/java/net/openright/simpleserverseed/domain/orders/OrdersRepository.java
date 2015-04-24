@@ -31,7 +31,7 @@ class OrdersRepository {
 
 	int insert(Order order) {
 		validateOrder(order);
-		return database.doInTransaction(() -> {
+		return database.doInTransactionWithResult(() -> {
 			int orderId = database.insert("insert into orders (title) values (?) returning id", order.getTitle());
 			order.setId(orderId);
 			insertOrderLines(order.getId(), order);
@@ -46,7 +46,6 @@ class OrdersRepository {
 			updateOrder(orderId, order);
 			deleteOrderLines(orderId);
 			insertOrderLines(orderId, order);
-			return null;
 		});
 	}
 
