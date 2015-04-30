@@ -26,7 +26,7 @@ public class SeedAppServer {
 
 	public static void main(String[] args) throws Exception {
 		new File("logs").mkdirs();
-		LogUtil.setupLogging("logging-simpleserverseed.xml");
+		LogUtil.setupLogging("logging-seedapp.xml");
 		IOUtil.extractResourceFile("seedapp.properties");
 
 		SeedAppConfig config = new SeedAppConfigFile("seedapp.properties");

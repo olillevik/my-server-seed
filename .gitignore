@@ -6,6 +6,5 @@
 .settings
 .classpath
 .project
-/logging-simpleserverseed.xml
 /seedapp.properties
 /seedapp-test.properties
