@@ -8,3 +8,5 @@
 .project
 /seedapp.properties
 /seedapp-test.properties
+/logging-seedapp.xml
+/logging-seedapp-test.xml
